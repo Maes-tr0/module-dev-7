@@ -1,0 +1,38 @@
+CREATE TABLE worker
+(
+    ID       BIGSERIAL PRIMARY KEY,
+    NAME     VARCHAR(1000) NOT NULL CHECK (length(NAME) >= 2 AND length(NAME) <= 1000),
+    BIRTHDAY DATE CHECK (extract(YEAR FROM BIRTHDAY) > 1900),
+    LEVEL    VARCHAR(7)    NOT NULL CHECK (LEVEL IN ('Trainee', 'Junior', 'Middle', 'Senior')),
+    SALARY   INTEGER CHECK (SALARY >= 100 AND SALARY <= 100000)
+);
+
+CREATE TABLE client
+(
+    ID   BIGSERIAL PRIMARY KEY,
+    NAME VARCHAR(1000) NOT NULL CHECK (length(NAME) >= 2 AND length(NAME) <= 1000)
+);
+
+CREATE TABLE project
+(
+    ID          BIGSERIAL PRIMARY KEY,
+    CLIENT_ID   BIGINT,
+    CONSTRAINT fk_client
+        FOREIGN KEY (CLIENT_ID)
+            REFERENCES client (ID),
+    START_DATE  DATE,
+    FINISH_DATE DATE
+);
+
+CREATE TABLE project_worker
+(
+    PROJECT_ID BIGINT,
+    CONSTRAINT fk_project
+        FOREIGN KEY (PROJECT_ID)
+            REFERENCES project (ID),
+    WORKER_ID  BIGINT,
+    CONSTRAINT fk_worker
+        FOREIGN KEY (WORKER_ID)
+            REFERENCES worker (ID),
+    PRIMARY KEY (PROJECT_ID, WORKER_ID)
+);
