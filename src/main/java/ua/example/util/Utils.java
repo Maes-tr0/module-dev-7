@@ -8,24 +8,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 @UtilityClass
 public class Utils {
     public static void executeSqlScript(Connection conn, String sqlScript) throws SQLException {
-        try (Statement stmt = conn.createStatement()) {
-            String[] sqlStatements = sqlScript.split(";");
-            for (String sql : sqlStatements) {
-                sql = sql.trim();
-                if (!sql.isEmpty()) {
-                    stmt.addBatch(sql);
+        String[] sqlStatements = sqlScript.split(";");
+
+        for (String sql : sqlStatements) {
+            sql = sql.trim();
+            if (!sql.isEmpty()) {
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.executeUpdate();
                 }
             }
-            stmt.executeBatch();
         }
     }
+
     public static String loadSqlScript(String resourcePath) {
         StringBuilder result = new StringBuilder();
 

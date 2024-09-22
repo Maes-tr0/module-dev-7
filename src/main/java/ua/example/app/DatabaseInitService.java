@@ -26,22 +26,23 @@ public class DatabaseInitService {
     }
 
     private static void deleteDatabaseStructure(Connection conn) throws SQLException {
-        final String SCRIPT = "DROP TABLE IF EXISTS %s CASCADE";
-        try (Statement stmt = conn.createStatement()) {
-            DatabaseMetaData metaData = conn.getMetaData();
-            String catalog = conn.getCatalog();
-            String schemaPattern = conn.getSchema();
-            String tableNamePattern = "%";
-            String[] types = {"TABLE"};
+        final String SCRIPT = "DROP TABLE IF EXISTS ? CASCADE";
+        DatabaseMetaData metaData = conn.getMetaData();
+        String catalog = conn.getCatalog();
+        String schemaPattern = conn.getSchema();
+        String tableNamePattern = "%";
+        String[] types = {"TABLE"};
 
-            ResultSet resultSet = metaData.getTables(catalog, schemaPattern, tableNamePattern, types);
+        ResultSet resultSet = metaData.getTables(catalog, schemaPattern, tableNamePattern, types);
 
-            while (resultSet.next()) {
-                String tableName = resultSet.getString("TABLE_NAME");
-                String sql = String.format(SCRIPT, tableName);
-                stmt.addBatch(sql);
+        while (resultSet.next()) {
+            String tableName = resultSet.getString("TABLE_NAME");
+
+            try (PreparedStatement stmt = conn.prepareStatement(SCRIPT)) {
+                stmt.setString(1, tableName);
+                stmt.executeUpdate();
             }
-            stmt.executeBatch();
         }
     }
+
 }

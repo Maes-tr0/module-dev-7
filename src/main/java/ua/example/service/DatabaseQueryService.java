@@ -24,8 +24,9 @@ public class DatabaseQueryService {
         if (sqlScript == null || sqlScript.isEmpty()) {
             return result;
         }
-        try (Statement statement = Database.getConnection().createStatement();
-             ResultSet resultSet = statement.executeQuery(sqlScript)) {
+
+        try (PreparedStatement preparedStatement = Database.getConnection().prepareStatement(sqlScript);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
                 T item = mapper.map(resultSet);
@@ -36,6 +37,7 @@ public class DatabaseQueryService {
         }
         return result;
     }
+
 
     public List<MaxSalaryWorker> findMaxSalaryWorker() {
         return executeQuery("/sql/find_max_salary_worker.sql", resultSet -> {
